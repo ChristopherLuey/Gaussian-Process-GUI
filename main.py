@@ -1,163 +1,333 @@
-import threading
-
-class TkRepeatingTask():
-
-    def __init__( self, tkRoot, taskFuncPointer, freqencyMillis ):
-        self.__tk_   = tkRoot
-        self.__func_ = taskFuncPointer
-        self.__freq_ = freqencyMillis
-        self.__isRunning_ = False
-
-    def isRunning( self ) : return self.__isRunning_
-
-    def start( self ) :
-        self.__isRunning_ = True
-        self.__onTimer()
-
-    def stop( self ) : self.__isRunning_ = False
-
-    def __onTimer( self ):
-        if self.__isRunning_ :
-            self.__func_()
-            self.__tk_.after( self.__freq_, self.__onTimer )
-
-class BackgroundTask():
-
-    def __init__( self, taskFuncPointer ):
-        self.__taskFuncPointer_ = taskFuncPointer
-        self.__workerThread_ = None
-        self.__isRunning_ = False
-
-    def taskFuncPointer( self ) : return self.__taskFuncPointer_
-
-    def isRunning( self ) :
-        return self.__isRunning_ and self.__workerThread_.isAlive()
-
-    def start( self ):
-        if not self.__isRunning_ :
-            self.__isRunning_ = True
-            self.__workerThread_ = self.WorkerThread( self )
-            self.__workerThread_.start()
-
-    def stop( self ) : self.__isRunning_ = False
-
-    class WorkerThread( threading.Thread ):
-        def __init__( self, bgTask ):
-            threading.Thread.__init__( self )
-            self.__bgTask_ = bgTask
-
-        def run( self ):
-            try :
-                self.__bgTask_.taskFuncPointer()( self.__bgTask_.isRunning )
-            except Exception as e: print(repr(e))
-            self.__bgTask_.stop()
+import tkinter as tk
+from tkinter import ttk
+from tkinter import filedialog
+from GPBO import *
+import pandas as pd
 
 
-def tkThreadingTest():
+class App(ttk.Frame):
+    def __init__(self, parent):
+        ttk.Frame.__init__(self)
 
-    from tkinter import Tk, Label, Button, StringVar
-    from time import sleep
+        self.columnconfigure(index=0, weight=1)
+        self.rowconfigure(index=0, weight=0)
 
-    class UnitTestGUI:
+        # Create value lists
+        self.option_menu_list = ["", "OptionMenu", "Option 1", "Option 2"]
+        self.combo_list = ["Combobox", "Editable item 1", "Editable item 2"]
+        self.readonly_combo_list = ["Readonly combobox", "Item 1", "Item 2"]
 
-        def __init__( self, master ):
-            self.master = master
-            master.title( "Threading Test" )
+        # Create control variables
+        self.var_0 = tk.BooleanVar()
+        self.var_1 = tk.BooleanVar(value=True)
+        self.var_2 = tk.BooleanVar()
+        self.var_3 = tk.IntVar(value=2)
+        self.var_4 = tk.StringVar(value=self.option_menu_list[1])
+        self.var_5 = tk.DoubleVar(value=75.0)
+        self.spinner_var = tk.StringVar()
+        self.file_path_var = tk.StringVar()
 
-            self.testButton = Button( 
-                self.master, text="Blocking", command=self.myLongProcess )
-            self.testButton.pack()
+        self.axis_tracker = []
+        self.gp = GPToolModel()
 
-            self.threadedButton = Button( 
-                self.master, text="Threaded", command=self.onThreadedClicked )
-            self.threadedButton.pack()
+        # Create widgets :)
+        self.setup_widgets()
 
-            self.cancelButton = Button( 
-                self.master, text="Stop", command=self.onStopClicked )
-            self.cancelButton.pack()
 
-            self.statusLabelVar = StringVar()
-            self.statusLabel = Label( master, textvariable=self.statusLabelVar )
-            self.statusLabel.pack()
+    def setup_widgets(self):
+        # Create a Frame for the Checkbuttons
+        # self.check_frame = ttk.LabelFrame(self, text="Checkbuttons", padding=(20, 10))
+        # self.check_frame.grid(
+        #     row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew"
+        # )
+        #
+        # # Checkbuttons
+        # self.check_1 = ttk.Checkbutton(
+        #     self.check_frame, text="Unchecked", variable=self.var_0
+        # )
+        # self.check_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # self.check_2 = ttk.Checkbutton(
+        #     self.check_frame, text="Checked", variable=self.var_1
+        # )
+        # self.check_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # self.check_3 = ttk.Checkbutton(
+        #     self.check_frame, text="Third state", variable=self.var_2
+        # )
+        # self.check_3.state(["alternate"])
+        # self.check_3.grid(row=2, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # self.check_4 = ttk.Checkbutton(
+        #     self.check_frame, text="Disabled", state="disabled"
+        # )
+        # self.check_4.state(["disabled !alternate"])
+        # self.check_4.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # # Separator
+        # self.separator = ttk.Separator(self)
+        # self.separator.grid(row=1, column=0, padx=(20, 10), pady=10, sticky="ew")
+        #
+        # # Create a Frame for the Radiobuttons
+        # self.radio_frame = ttk.LabelFrame(self, text="Radiobuttons", padding=(20, 10))
+        # self.radio_frame.grid(row=2, column=0, padx=(20, 10), pady=10, sticky="nsew")
+        #
+        # # Radiobuttons
+        # self.radio_1 = ttk.Radiobutton(
+        #     self.radio_frame, text="Unselected", variable=self.var_3, value=1
+        # )
+        # self.radio_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
+        # self.radio_2 = ttk.Radiobutton(
+        #     self.radio_frame, text="Selected", variable=self.var_3, value=2
+        # )
+        # self.radio_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
+        # self.radio_4 = ttk.Radiobutton(
+        #     self.radio_frame, text="Disabled", state="disabled"
+        # )
+        # self.radio_4.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # # Create a Frame for input widgets
+        # self.widgets_frame = ttk.Frame(self, padding=(0, 0, 0, 10))
+        # self.widgets_frame.grid(
+        #     row=0, column=1, padx=10, pady=(30, 10), sticky="nsew", rowspan=3
+        # )
+        # self.widgets_frame.columnconfigure(index=0, weight=1)
+        #
+        # # Entry
+        # self.entry = ttk.Entry(self.widgets_frame)
+        # self.entry.insert(0, "Entry")
+        # self.entry.grid(row=0, column=0, padx=5, pady=(0, 10), sticky="ew")
+        #
+        # # Spinbox
+        # self.spinbox = ttk.Spinbox(self.widgets_frame, from_=0, to=100, increment=0.1)
+        # self.spinbox.insert(0, "Spinbox")
+        # self.spinbox.grid(row=1, column=0, padx=5, pady=10, sticky="ew")
+        #
+        # # Combobox
+        # self.combobox = ttk.Combobox(self.widgets_frame, values=self.combo_list)
+        # self.combobox.current(0)
+        # self.combobox.grid(row=2, column=0, padx=5, pady=10, sticky="ew")
+        #
+        # # Read-only combobox
+        # self.readonly_combo = ttk.Combobox(
+        #     self.widgets_frame, state="readonly", values=self.readonly_combo_list
+        # )
+        # self.readonly_combo.current(0)
+        # self.readonly_combo.grid(row=3, column=0, padx=5, pady=10, sticky="ew")
+        #
+        # # Menu for the Menubutton
+        # self.menu = tk.Menu(self)
+        # self.menu.add_command(label="Menu item 1")
+        # self.menu.add_command(label="Menu item 2")
+        # self.menu.add_separator()
+        # self.menu.add_command(label="Menu item 3")
+        # self.menu.add_command(label="Menu item 4")
+        #
+        # # Menubutton
+        # self.menubutton = ttk.Menubutton(
+        #     self.widgets_frame, text="Menubutton", menu=self.menu, direction="below"
+        # )
+        # self.menubutton.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # # OptionMenu
+        # self.optionmenu = ttk.OptionMenu(
+        #     self.widgets_frame, self.var_4, *self.option_menu_list
+        # )
+        # self.optionmenu.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # # Button
+        # self.button = ttk.Button(self.widgets_frame, text="Button")
+        # self.button.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # # Accentbutton
+        # self.accentbutton = ttk.Button(
+        #     self.widgets_frame, text="Accent button", style="Accent.TButton"
+        # )
+        # self.accentbutton.grid(row=7, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # # Togglebutton
+        # self.togglebutton = ttk.Checkbutton(
+        #     self.widgets_frame, text="Toggle button", style="Toggle.TButton"
+        # )
+        # self.togglebutton.grid(row=8, column=0, padx=5, pady=10, sticky="nsew")
+        #
+        # # Switch
+        # self.switch = ttk.Checkbutton(
+        #     self.widgets_frame, text="Switch", style="Switch.TCheckbutton"
+        # )
+        # self.switch.grid(row=9, column=0, padx=5, pady=10, sticky="nsew")
+        title_font = ("Arial", 30, "bold")
+        title = ttk.Label(self, text="GP BO Tool", font=title_font)
+        title.grid(row=0, column=0, sticky="nw")
 
-            self.clickMeButton = Button( 
-                self.master, text="Click Me", command=self.onClickMeClicked )
-            self.clickMeButton.pack()
+        # Panedwindow
+        self.paned = ttk.PanedWindow(self)
+        self.paned.grid(row=1, column=0, pady=(5, 5), sticky="nsew", rowspan=4, columnspan=4)
 
-            self.clickCountLabelVar = StringVar()            
-            self.clickCountLabel = Label( master,  textvariable=self.clickCountLabelVar )
-            self.clickCountLabel.pack()
+        # Notebook, pane #2
+        self.pane_2 = ttk.Frame(self.paned, padding=5)
+        self.paned.add(self.pane_2, weight=1)
 
-            self.threadedButton = Button( 
-                self.master, text="Timer", command=self.onTimerClicked )
-            self.threadedButton.pack()
+        # Notebook, pane #2
+        self.notebook = ttk.Notebook(self.pane_2)
+        self.notebook.pack(fill="both", expand=False)
 
-            self.timerCountLabelVar = StringVar()            
-            self.timerCountLabel = Label( master,  textvariable=self.timerCountLabelVar )
-            self.timerCountLabel.pack()
+        # Tab #1
+        self.tab_1 = ttk.Frame(self.notebook)
+        # for index in [0, 1]:
+        #     self.tab_1.columnconfigure(index=index, weight=1)
+        #     self.tab_1.rowconfigure(index=index, weight=1)
+        self.notebook.add(self.tab_1, text="Configuration")
 
-            self.timerCounter_=0
+        # Label
+        self.label = ttk.Label(
+            self.tab_1,
+            text="Dimension of Design Space",
+            justify="left",
+            font=("-size", 12, "-weight", "bold"),
+        )
+        self.label.grid(row=0, column=0, pady=10, sticky="nw")
 
-            self.clickCounter_=0
+        self.define_axis = ttk.LabelFrame(self.tab_1, text="Define Axis", padding=(20, 10))
+        self.define_axis.grid(row=2, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
 
-            self.bgTask = BackgroundTask( self.myLongProcess )
+        self.spinner_var.trace("w", self.update_text_widgets)
 
-            self.timer = TkRepeatingTask( self.master, self.onTimer, 1 )
+        self.spinbox = ttk.Spinbox(self.tab_1, from_=1, to=5, increment=1, textvariable=self.spinner_var)
+        self.spinbox.insert(0, "1")
+        self.spinbox.grid(row=1, column=0, padx=5, pady=5, sticky="nw")
 
-        def close( self ) :
-            print("close")
-            try: self.bgTask.stop()
-            except: pass
-            try: self.timer.stop()
-            except: pass            
-            self.master.quit()
+        for index,value in enumerate(["Name", "Lower Limit", "Upper Limit"]):
+            self.label = ttk.Label(
+                self.define_axis,
+                text=value,
+                justify="left",
+                font=("-size", 12, "-weight", "bold"),
+            )
+            self.label.grid(row=0, column=index, pady=5, padx=5, sticky="n")
 
-        def onThreadedClicked( self ):
-            print("onThreadedClicked")
-            try: self.bgTask.start()
-            except: pass
+        self.update_text_widgets()
 
-        def onTimerClicked( self ) :
-            print("onTimerClicked")
-            self.timer.start()
+        self.label = ttk.Label(
+            self.tab_1,
+            text="Upload Data",
+            justify="left",
+            font=("-size", 12, "-weight", "bold"),
+        )
+        self.label.grid(row=3, column=0, pady=10, sticky="nw")
 
-        def onStopClicked( self ) :
-            print("onStopClicked")
-            try: self.bgTask.stop()
-            except: pass
-            try: self.timer.stop()
-            except: pass                        
+        self.browse_button = ttk.Button(self.tab_1, text="Select CSV File", command=self.open_file_browser)
+        self.browse_button.grid(row=4, column=0, pady=10, sticky="nw")
 
-        def onClickMeClicked( self ):
-            print("onClickMeClicked")
-            self.clickCounter_+=1
-            self.clickCountLabelVar.set( str(self.clickCounter_) )
+        self.file_path_entry = ttk.Entry(self.tab_1, width=100, textvariable=self.file_path_var, state="readonly")
+        self.file_path_entry.grid(row=5, column=0, pady=10, sticky="nw")
 
-        def onTimer( self ) :
-            print("onTimer")
-            self.timerCounter_+=1
-            self.timerCountLabelVar.set( str(self.timerCounter_) )
+        self.tree = ttk.Treeview(self.tab_1, height=3)
+        self.tree.grid(row=6, column=0, pady=10, sticky="nw")
 
-        def myLongProcess( self, isRunningFunc=None ) :
-            print("starting myLongProcess")
-            for i in range( 1, 10 ):
-                try:
-                    if not isRunningFunc() :
-                        self.onMyLongProcessUpdate( "Stopped!" )
-                        return
-                except : pass   
-                self.onMyLongProcessUpdate( i )
-                sleep( 1.5 ) # simulate doing work
-            self.onMyLongProcessUpdate( "Done!" )                
+        self.run = ttk.Button(self.tab_1, text="Run GP BO", command=self.gprun, style="Accent.TButton")
+        self.run.grid(row=7, column=0, pady=10, sticky="nw")
 
-        def onMyLongProcessUpdate( self, status ) :
-            print("Process Update: %s" % (status,))
-            self.statusLabelVar.set( str(status) )
+        # Tab #2
+        self.tab_2 = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_2, text="Result")
 
-    root = Tk()    
-    gui = UnitTestGUI( root )
-    root.protocol( "WM_DELETE_WINDOW", gui.close )
+        # Tab #3
+        # self.tab_3 = ttk.Frame(self.notebook)
+        # self.notebook.add(self.tab_3, text="Tab 3")
+
+        # Sizegrip
+        self.sizegrip = ttk.Sizegrip(self)
+        self.sizegrip.grid(row=100, column=100, padx=(0, 0), pady=(0, 5))
+
+    def switch_to_tab(self):
+        # Switch to the second tab (index 1)
+        self.notebook.select(1)  # Replace 1 with the index of the tab you want to switch to
+
+    def gprun(self):
+        self.gp.n = int(self.spinbox.get())
+        limits = []
+        for i in self.axis_tracker:
+            limits.append([int(i[1].get("1.0", tk.END)), int(i[2].get("1.0", tk.END))])
+        self.gp.limits = limits
+        te = self.gp.runGPBO()
+        self.switch_to_tab()
+
+
+    def display_csv(self, file_path):
+        try:
+            df = pd.read_csv(file_path)
+            headers = []
+            for i in self.axis_tracker:
+                headers.append(i[0].get("1.0", tk.END).replace("\n", ""))
+            headers.append("y")
+            self.tree["columns"] = headers[1:]
+            self.tree.delete(*self.tree.get_children())
+            self.tree.heading("#0", text=headers[0])
+
+            data = df.head(5)
+            for index, row in data.iterrows():
+                self.tree.insert("", "end",text=row.iloc[0], values=tuple(row.iloc[1:]))
+
+            for header in headers[1:]:
+                self.tree.heading(header, text=header)
+
+            self.gp.file_name = file_path
+
+        except pd.errors.EmptyDataError:
+            print("The CSV file is empty.")
+        except Exception as e:
+            print(f"Error: {e}")
+
+    def open_file_browser(self):
+        file_path = filedialog.askopenfilename()
+        if file_path:
+            self.file_path_var.set(file_path)
+            self.display_csv(file_path)
+
+    def update_text_widgets(self, *args):
+        num_rows = int(self.spinbox.get())
+
+        if num_rows > len(self.axis_tracker):
+            self.add_text_widgets(num_rows - len(self.axis_tracker))
+        elif num_rows < len(self.axis_tracker):
+            self.remove_text_widgets(len(self.axis_tracker) - num_rows)
+
+    def add_text_widgets(self, num_rows_to_add):
+        for i in range(num_rows_to_add):
+            row_widgets = []
+
+            for _ in range(3):
+                text_widget = tk.Text(self.define_axis, height=1, width=10)
+                text_widget.grid(row=i+len(self.axis_tracker)+1, column=_, padx=5, pady=5, sticky="n")
+                if _ == 0:
+                    text_widget.insert(tk.END, "x{}".format(i+len(self.axis_tracker)+1))
+                row_widgets.append(text_widget)
+            self.axis_tracker.append(row_widgets)
+
+    def remove_text_widgets(self, num_rows_to_remove):
+        for _ in range(num_rows_to_remove):
+            row_widgets = self.axis_tracker.pop()
+            for widget in row_widgets:
+                widget.grid_forget()  # Remove widgets from display
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.title("")
+
+    # Simply set the theme
+    root.tk.call("source", "azure.tcl")
+    root.tk.call("set_theme", "light")
+
+    app = App(root)
+    app.pack(fill="both", expand=True)
+
+    # Set a minsize for the window, and place it in the middle
+    root.update()
+    root.minsize(root.winfo_width(), root.winfo_height())
+    x_cordinate = int((root.winfo_screenwidth() / 2) - (root.winfo_width() / 2))
+    y_cordinate = int((root.winfo_screenheight() / 2) - (root.winfo_height() / 2))
+    root.geometry("+{}+{}".format(x_cordinate, y_cordinate-20))
+
     root.mainloop()
-
-if __name__ == "__main__": 
-    tkThreadingTest()
