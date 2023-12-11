@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 from GPBO import *
 import pandas as pd
 
@@ -26,6 +29,8 @@ class App(ttk.Frame):
         self.var_5 = tk.DoubleVar(value=75.0)
         self.spinner_var = tk.StringVar()
         self.file_path_var = tk.StringVar()
+        self.plot_var = tk.StringVar()
+
 
         self.axis_tracker = []
         self.gp = GPToolModel()
@@ -232,6 +237,33 @@ class App(ttk.Frame):
         self.tab_2 = ttk.Frame(self.notebook)
         self.notebook.add(self.tab_2, text="Result")
 
+        self.label = ttk.Label(
+            self.tab_2,
+            text="Result",
+            justify="left",
+            font=("-size", 12, "-weight", "bold"),
+        )
+        self.label.grid(row=0, column=0, pady=10, sticky="nw")
+
+        self.tree2 = ttk.Treeview(self.tab_2, height=1)
+        self.tree2.grid(row=1, column=0, pady=5, sticky="nw")
+
+        self.label = ttk.Label(
+            self.tab_2,
+            text="Graphing",
+            justify="left",
+            font=("-size", 12, "-weight", "bold"),
+        )
+        self.label.grid(row=2, column=0, pady=10, sticky="nw")
+
+        self.plot_var.trace("w", self.plot_graph)
+
+        self.spinbox2 = ttk.Spinbox(self.tab_2, from_=1, to=int(self.spinbox.get()), increment=1, textvariable=self.plot_var)
+        self.spinbox2.insert(0, "1")
+        self.spinbox2.grid(row=3, column=0, padx=5, pady=5, sticky="nw")
+
+
+
         # Tab #3
         # self.tab_3 = ttk.Frame(self.notebook)
         # self.notebook.add(self.tab_3, text="Tab 3")
@@ -239,6 +271,16 @@ class App(ttk.Frame):
         # Sizegrip
         self.sizegrip = ttk.Sizegrip(self)
         self.sizegrip.grid(row=100, column=100, padx=(0, 0), pady=(0, 5))
+
+    def plot_graph(self, *args):
+        axis = int(self.spinbox2.get())
+        fig = self.gp.graph(axis)
+        if fig is not None:
+
+            canvas = FigureCanvasTkAgg(fig, master=self.tab_2)
+            canvas.draw()
+            canvas.get_tk_widget().grid(row=4, column=0, padx=5, pady=5, sticky="nw")
+
 
     def switch_to_tab(self):
         # Switch to the second tab (index 1)
@@ -248,11 +290,24 @@ class App(ttk.Frame):
         self.gp.n = int(self.spinbox.get())
         limits = []
         for i in self.axis_tracker:
-            limits.append([int(i[1].get("1.0", tk.END)), int(i[2].get("1.0", tk.END))])
+            limits.append([int(i[1].get("1.0", tk.END).replace("\n", "")), int(i[2].get("1.0", tk.END).replace("\n", ""))])
         self.gp.limits = limits
         te = self.gp.runGPBO()
+        print(te)
         self.switch_to_tab()
 
+        headers = []
+        for i in self.axis_tracker:
+            headers.append(i[0].get("1.0", tk.END).replace("\n", ""))
+        #headers.append("y")
+        self.tree2["columns"] = headers[1:]
+        self.tree2.delete(*self.tree2.get_children())
+        self.tree2.heading("#0", text=headers[0])
+        self.tree2.insert("", "end", text=te[0], values=tuple(te[1:]))
+
+        print(headers)
+        for header in headers[1:]:
+            self.tree2.heading(header, text=header)
 
     def display_csv(self, file_path):
         try:
