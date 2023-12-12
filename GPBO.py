@@ -27,6 +27,9 @@ class GPToolModel:
         self.limits = []
         self.file_name = None
         self.x = None
+        self.graphed_axis = 0
+        self.fig1, self.fig2 = None, None
+        self.te = None
 
     # Expected improvement, maximizing y
     def calculate_acf(self, pred_mean, pred_std, y_max):
@@ -66,8 +69,10 @@ class GPToolModel:
             indices.insert(0, remainder)
         return tuple(indices)
 
-    def runGPBO(self):
+    def read_file(self):
         self.x = pd.read_csv(self.file_name, dtype=np.float64, header=None).to_numpy()
+
+    def runGPBO(self):
         self.x_sample_space = np.empty(self.sample_size).T
         for i in range(self.n):
             _ = np.linspace(self.limits[i][0], self.limits[i][1], self.sample_size)
@@ -102,9 +107,9 @@ class GPToolModel:
                 self.variance[indices] = 1.96 * np.sqrt(model_preds.variance.numpy())
 
             location = np.unravel_index(self.acq_func.argmax(), self.acq_func.shape)
-            te = mesh[location]
+            self.te = mesh[location]
 
-            return te
+            return self.te
 
     def query(self, p):
         p = np.array(p)
@@ -114,15 +119,31 @@ class GPToolModel:
         print("The mean is {} and the variance is {} at the point {}".format(model_preds.mean.numpy(), 1.96 * np.sqrt(
             model_preds.variance.numpy()), p))
 
-    def graph(self,axis):
+        return model_preds.mean.numpy(), 1.96 * np.sqrt(
+            model_preds.variance.numpy())
 
-        if self.x is not None:
-            fig, ax = plt.subplots()
-            # ax.plot(x,y, label="1")
-            ax.scatter(self.x.T[axis-1], self.x.T[-1], label="3")
-            ax.plot(self.x_sample_space[axis-1].T, self.mean[axis-1], label="4")
-            ax.fill_between(self.x_sample_space[axis-1].T, (self.mean[axis-1] - self.variance[axis-1]), (self.mean[axis-1] + self.variance[axis-1]), alpha=0.3)
-            plt.plot(self.x_sample_space[axis-1].T, self.acq_func[axis-1], label="2")
+    def graph(self,axis):
+        # if self.graphed_axis == axis:
+        #     return self.fig1
+
+        if self.x is not None and self.n == 1:
+            self.fig1, (self.ax1,self.ax2) = plt.subplots(2,1, sharex=True, figsize=(6, 6))
+            self.ax1.scatter(self.x.T[axis-1], self.x.T[-1], label="3")
+            self.ax1.plot(self.x_sample_space[axis-1].T, self.mean, label="4")
+            self.ax1.fill_between(self.x_sample_space[axis-1].T, (self.mean - self.variance), (self.mean + self.variance), alpha=0.3)
+            #self.fig2, self.ax2 = plt.subplots()
+            self.ax2.plot(self.x_sample_space[axis-1].T, self.acq_func, label="2")
+            #plt.show()
+            print("success")
+            self.graphed_axis = axis
             plt.show()
-            return fig
+            return None
+            #return self.fig1
         return None
+
+    def new_data(self, checked, y):
+        self.sample_size += 1
+        print(type(self.te))
+        self.x = np.vstack((self.x, np.array([*self.te, y])))
+        if checked:
+            np.savetxt(self.file_name, self.x, delimiter=",")

@@ -30,6 +30,10 @@ class App(ttk.Frame):
         self.spinner_var = tk.StringVar()
         self.file_path_var = tk.StringVar()
         self.plot_var = tk.StringVar()
+        self.canvas = None  # Initialize canvas as None
+
+        self.query_tracker = []
+
 
 
         self.axis_tracker = []
@@ -195,6 +199,12 @@ class App(ttk.Frame):
 
         self.define_axis = ttk.LabelFrame(self.tab_1, text="Define Axis", padding=(20, 10))
         self.define_axis.grid(row=2, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
+        self.tab_2 = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab_2, text="Result")
+        self.query_point = ttk.LabelFrame(self.tab_2, text="Query Point", padding=(20, 10))
+        self.query_point.grid(row=3, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
+        self.input_new = ttk.LabelFrame(self.tab_2, text="Input New Data", padding=(20, 10))
+        self.input_new.grid(row=4, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
 
         self.spinner_var.trace("w", self.update_text_widgets)
 
@@ -234,8 +244,7 @@ class App(ttk.Frame):
         self.run.grid(row=7, column=0, pady=10, sticky="nw")
 
         # Tab #2
-        self.tab_2 = ttk.Frame(self.notebook)
-        self.notebook.add(self.tab_2, text="Result")
+
 
         self.label = ttk.Label(
             self.tab_2,
@@ -248,21 +257,36 @@ class App(ttk.Frame):
         self.tree2 = ttk.Treeview(self.tab_2, height=1)
         self.tree2.grid(row=1, column=0, pady=5, sticky="nw")
 
-        self.label = ttk.Label(
-            self.tab_2,
-            text="Graphing",
-            justify="left",
-            font=("-size", 12, "-weight", "bold"),
-        )
-        self.label.grid(row=2, column=0, pady=10, sticky="nw")
+        self.graph = ttk.LabelFrame(self.tab_2, text="Graphing", padding=(20, 10))
+        self.graph.grid(row=2, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
 
         self.plot_var.trace("w", self.plot_graph)
 
-        self.spinbox2 = ttk.Spinbox(self.tab_2, from_=1, to=int(self.spinbox.get()), increment=1, textvariable=self.plot_var)
+        self.spinbox2 = ttk.Spinbox(self.graph, from_=1, to=int(self.spinbox.get()), increment=1, textvariable=self.plot_var)
         self.spinbox2.insert(0, "1")
-        self.spinbox2.grid(row=3, column=0, padx=5, pady=5, sticky="nw")
+        self.spinbox2.grid(row=0, column=0, padx=5, pady=5, sticky="nw")
+        self.plot_graph()
 
+        self.query = ttk.Button(self.query_point, text="Query Point", command=self.query_p, style="Accent.TButton")
+        self.query.grid(row=len(self.query_tracker)+1, column=0, pady=10, sticky="nw")
 
+        l = ttk.Label(
+            self.input_new,
+            text="y=",
+            justify="left",
+            font=("-size", 12, "-weight", "bold"),
+        )
+        l.grid(row=0, column=0, pady=5, sticky="nw")
+
+        self.yt = tk.Text(self.input_new, height=1, width=10)
+        self.yt.grid(row=0, column=1, padx=5, pady=5, sticky="nw")
+
+        self.togglebutton = ttk.Checkbutton(
+            self.input_new, text="Edit CSV", style="Toggle.TButton"
+        )
+        self.togglebutton.grid(row=1, column=0, padx=5, pady=1, sticky="nw")
+        self.new_data = ttk.Button(self.input_new, text="Generate", command=self.input_new_data, style="Accent.TButton")
+        self.new_data.grid(row=2, column=0, pady=1, sticky="nw")
 
         # Tab #3
         # self.tab_3 = ttk.Frame(self.notebook)
@@ -272,19 +296,71 @@ class App(ttk.Frame):
         self.sizegrip = ttk.Sizegrip(self)
         self.sizegrip.grid(row=100, column=100, padx=(0, 0), pady=(0, 5))
 
+
+    def input_new_data(self):
+        checked = self.togglebutton.instate(['selected'])
+        y = float(self.yt.get("1.0", tk.END).replace("\n", ""))
+        print(y)
+        print(type(y))
+        self.gp.new_data(checked, y)
+        self.gprun()
+
+
+    def query_p(self):
+        q = []
+        print(self.query_tracker)
+        for i in self.query_tracker:
+            try:
+                q.append(float(i[1].get("1.0", tk.END).replace("\n", "")))
+            except:
+                print("wrong character input")
+                return
+
+        mean, variance = self.gp.query(q)
+
+        if hasattr(self, 'mean_l'):
+            self.mean_l.destroy()
+        if hasattr(self, 'variance_l'):
+            self.variance_l.destroy()
+
+        self.mean_l = ttk.Label(
+            self.query_point,
+            text="Mean: {}".format(mean),
+            justify="left",
+            font=("-size", 12, "-weight", "bold"), )
+        self.mean_l.grid(row=len(self.query_tracker) + 2, column=0, pady=5, sticky="nw")
+        self.variance_l = ttk.Label(
+            self.query_point,
+            text="Variance: {}".format(variance),
+            justify="left",
+            font=("-size", 12, "-weight", "bold"), )
+        self.variance_l.grid(row=len(self.query_tracker) + 3, column=0, pady=5, sticky="nw")
+
     def plot_graph(self, *args):
         axis = int(self.spinbox2.get())
-        fig = self.gp.graph(axis)
-        if fig is not None:
+        fig1 = self.gp.graph(axis)
+        if fig1 is not None:
+            if self.canvas:
+                self.canvas.get_tk_widget().destroy()  # Destroy previous canvas if exists
+            self.canvas = FigureCanvasTkAgg(fig1, master=self.graph)
+            self.canvas_widget = self.canvas.get_tk_widget()
+            self.canvas_widget.grid(row=1, column=0, sticky="nsew", expand=True)
 
-            canvas = FigureCanvasTkAgg(fig, master=self.tab_2)
-            canvas.draw()
-            canvas.get_tk_widget().grid(row=4, column=0, padx=5, pady=5, sticky="nw")
+            self.scrollbar = ttk.Scrollbar(self.graph, orient="vertical", command=self.canvas_widget.yview)
+            self.scrollbar.grid(row=0, column=1, sticky="ns")
+            self.canvas_widget.configure(yscrollcommand=self.scrollbar.set)
+            self.canvas.draw()
+
+            self.canvas_widget.bind("<Configure>", self.update_scrollregion)
+
+    def update_scrollregion(self, event):
+        self.canvas_widget.configure(scrollregion=self.canvas_widget.bbox("all"))
 
 
     def switch_to_tab(self):
         # Switch to the second tab (index 1)
         self.notebook.select(1)  # Replace 1 with the index of the tab you want to switch to
+        self.plot_graph()
 
     def gprun(self):
         self.gp.n = int(self.spinbox.get())
@@ -292,6 +368,7 @@ class App(ttk.Frame):
         for i in self.axis_tracker:
             limits.append([int(i[1].get("1.0", tk.END).replace("\n", "")), int(i[2].get("1.0", tk.END).replace("\n", ""))])
         self.gp.limits = limits
+
         te = self.gp.runGPBO()
         print(te)
         self.switch_to_tab()
@@ -328,6 +405,7 @@ class App(ttk.Frame):
                 self.tree.heading(header, text=header)
 
             self.gp.file_name = file_path
+            self.gp.read_file()
 
         except pd.errors.EmptyDataError:
             print("The CSV file is empty.")
@@ -358,13 +436,30 @@ class App(ttk.Frame):
                 if _ == 0:
                     text_widget.insert(tk.END, "x{}".format(i+len(self.axis_tracker)+1))
                 row_widgets.append(text_widget)
+
             self.axis_tracker.append(row_widgets)
+
+            l = ttk.Label(
+                self.query_point,
+                text=self.axis_tracker[-1][0].get("1.0", tk.END).replace("\n", ""),
+                justify="left",
+                font=("-size", 12, "-weight", "bold"),)
+            l.grid(row=i+len(self.axis_tracker)-1, column=0, pady=5, sticky="nw")
+
+            t = tk.Text(self.query_point, height=1, width=10)
+            t.grid(row=i + len(self.axis_tracker)-1, column=1, padx=5, pady=5, sticky="n")
+            t.insert(tk.END, "0.0")
+
+            self.query_tracker.append([l,t])
 
     def remove_text_widgets(self, num_rows_to_remove):
         for _ in range(num_rows_to_remove):
             row_widgets = self.axis_tracker.pop()
+            w = self.query_tracker.pop()
             for widget in row_widgets:
                 widget.grid_forget()  # Remove widgets from display
+            for widget in w:
+                widget.grid_forget()
 
 
 if __name__ == "__main__":
