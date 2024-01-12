@@ -1,10 +1,27 @@
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 import numpy as np
 import torch
 import gpytorch
 import pandas as pd
 from scipy.stats import differential_entropy, norm
 from itertools import product
+
+
+# graphing different colors for samples
+# Save all of the images based on iteration
+# labeling
+# Size of the graph different, larger on top
+
+# Resoultion input
+
+# stochastic
+# homoscedastic means that the mean
+# heteroscedastic different uncertainties
+
+# Uncertainty inputs assigning differe
+# Optimization:
+# Search space
 
 
 class GPModel(gpytorch.models.ExactGP):
