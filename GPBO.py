@@ -144,7 +144,7 @@ class GPToolModel:
         #     return self.fig1
 
         if self.x is not None and self.n == 1:
-            self.fig1, (self.ax1,self.ax2) = plt.subplots(2,1, sharex=True, figsize=(6, 6))
+            self.fig1, (self.ax1, self.ax2) = plt.subplots(2, 1, sharex=True, figsize=(6, 6), gridspec_kw={'height_ratios': [2, 1]})
             self.ax1.scatter(self.x.T[axis-1], self.x.T[-1], label="3")
             self.ax1.plot(self.x_sample_space[axis-1].T, self.mean, label="4")
             self.ax1.fill_between(self.x_sample_space[axis-1].T, (self.mean - self.variance), (self.mean + self.variance), alpha=0.3)
@@ -153,9 +153,7 @@ class GPToolModel:
             #plt.show()
             print("success")
             self.graphed_axis = axis
-            plt.show()
-            return None
-            #return self.fig1
+            return self.fig1
         return None
 
     def new_data(self, checked, y):

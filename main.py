@@ -3,6 +3,9 @@ from tkinter import ttk
 from tkinter import filedialog
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import font
+
+import os
 
 from GPBO import *
 import pandas as pd
@@ -14,6 +17,7 @@ class App(ttk.Frame):
 
         self.columnconfigure(index=0, weight=1)
         self.rowconfigure(index=0, weight=0)
+
 
         # Create value lists
         self.option_menu_list = ["", "OptionMenu", "Option 1", "Option 2"]
@@ -44,130 +48,17 @@ class App(ttk.Frame):
 
 
     def setup_widgets(self):
-        # Create a Frame for the Checkbuttons
-        # self.check_frame = ttk.LabelFrame(self, text="Checkbuttons", padding=(20, 10))
-        # self.check_frame.grid(
-        #     row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew"
-        # )
-        #
-        # # Checkbuttons
-        # self.check_1 = ttk.Checkbutton(
-        #     self.check_frame, text="Unchecked", variable=self.var_0
-        # )
-        # self.check_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # self.check_2 = ttk.Checkbutton(
-        #     self.check_frame, text="Checked", variable=self.var_1
-        # )
-        # self.check_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # self.check_3 = ttk.Checkbutton(
-        #     self.check_frame, text="Third state", variable=self.var_2
-        # )
-        # self.check_3.state(["alternate"])
-        # self.check_3.grid(row=2, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # self.check_4 = ttk.Checkbutton(
-        #     self.check_frame, text="Disabled", state="disabled"
-        # )
-        # self.check_4.state(["disabled !alternate"])
-        # self.check_4.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # # Separator
-        # self.separator = ttk.Separator(self)
-        # self.separator.grid(row=1, column=0, padx=(20, 10), pady=10, sticky="ew")
-        #
-        # # Create a Frame for the Radiobuttons
-        # self.radio_frame = ttk.LabelFrame(self, text="Radiobuttons", padding=(20, 10))
-        # self.radio_frame.grid(row=2, column=0, padx=(20, 10), pady=10, sticky="nsew")
-        #
-        # # Radiobuttons
-        # self.radio_1 = ttk.Radiobutton(
-        #     self.radio_frame, text="Unselected", variable=self.var_3, value=1
-        # )
-        # self.radio_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
-        # self.radio_2 = ttk.Radiobutton(
-        #     self.radio_frame, text="Selected", variable=self.var_3, value=2
-        # )
-        # self.radio_2.grid(row=1, column=0, padx=5, pady=10, sticky="nsew")
-        # self.radio_4 = ttk.Radiobutton(
-        #     self.radio_frame, text="Disabled", state="disabled"
-        # )
-        # self.radio_4.grid(row=3, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # # Create a Frame for input widgets
-        # self.widgets_frame = ttk.Frame(self, padding=(0, 0, 0, 10))
-        # self.widgets_frame.grid(
-        #     row=0, column=1, padx=10, pady=(30, 10), sticky="nsew", rowspan=3
-        # )
-        # self.widgets_frame.columnconfigure(index=0, weight=1)
-        #
-        # # Entry
-        # self.entry = ttk.Entry(self.widgets_frame)
-        # self.entry.insert(0, "Entry")
-        # self.entry.grid(row=0, column=0, padx=5, pady=(0, 10), sticky="ew")
-        #
-        # # Spinbox
-        # self.spinbox = ttk.Spinbox(self.widgets_frame, from_=0, to=100, increment=0.1)
-        # self.spinbox.insert(0, "Spinbox")
-        # self.spinbox.grid(row=1, column=0, padx=5, pady=10, sticky="ew")
-        #
-        # # Combobox
-        # self.combobox = ttk.Combobox(self.widgets_frame, values=self.combo_list)
-        # self.combobox.current(0)
-        # self.combobox.grid(row=2, column=0, padx=5, pady=10, sticky="ew")
-        #
-        # # Read-only combobox
-        # self.readonly_combo = ttk.Combobox(
-        #     self.widgets_frame, state="readonly", values=self.readonly_combo_list
-        # )
-        # self.readonly_combo.current(0)
-        # self.readonly_combo.grid(row=3, column=0, padx=5, pady=10, sticky="ew")
-        #
-        # # Menu for the Menubutton
-        # self.menu = tk.Menu(self)
-        # self.menu.add_command(label="Menu item 1")
-        # self.menu.add_command(label="Menu item 2")
-        # self.menu.add_separator()
-        # self.menu.add_command(label="Menu item 3")
-        # self.menu.add_command(label="Menu item 4")
-        #
-        # # Menubutton
-        # self.menubutton = ttk.Menubutton(
-        #     self.widgets_frame, text="Menubutton", menu=self.menu, direction="below"
-        # )
-        # self.menubutton.grid(row=4, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # # OptionMenu
-        # self.optionmenu = ttk.OptionMenu(
-        #     self.widgets_frame, self.var_4, *self.option_menu_list
-        # )
-        # self.optionmenu.grid(row=5, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # # Button
-        # self.button = ttk.Button(self.widgets_frame, text="Button")
-        # self.button.grid(row=6, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # # Accentbutton
-        # self.accentbutton = ttk.Button(
-        #     self.widgets_frame, text="Accent button", style="Accent.TButton"
-        # )
-        # self.accentbutton.grid(row=7, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # # Togglebutton
-        # self.togglebutton = ttk.Checkbutton(
-        #     self.widgets_frame, text="Toggle button", style="Toggle.TButton"
-        # )
-        # self.togglebutton.grid(row=8, column=0, padx=5, pady=10, sticky="nsew")
-        #
-        # # Switch
-        # self.switch = ttk.Checkbutton(
-        #     self.widgets_frame, text="Switch", style="Switch.TCheckbutton"
-        # )
-        # self.switch.grid(row=9, column=0, padx=5, pady=10, sticky="nsew")
-        title_font = ("Arial", 30, "bold")
-        title = ttk.Label(self, text="GP BO Tool", font=title_font)
-        title.grid(row=0, column=0, sticky="nw")
+
+        title_font = ("Helvetica", 40, "bold")
+        minor_font = font.Font(family="Helvetica", size=15)
+        bold_font = font.Font(family="Helvetica", size=16, weight="bold")
+
+
+        title = ttk.Label(self, text="Northwestern IDEAL Statistical Tool", font=title_font, justify="center", foreground="royal blue")
+        title.grid(row=0, column=0, sticky="ew")
+
+        style = ttk.Style()
+        style.configure("Custom.Treeview", borderwidth=0, relief="flat")
 
         # Panedwindow
         self.paned = ttk.PanedWindow(self)
@@ -175,40 +66,95 @@ class App(ttk.Frame):
 
         # Notebook, pane #2
         self.pane_2 = ttk.Frame(self.paned, padding=5)
+        self.pane_2.columnconfigure(0, weight=1)
+        self.pane_2.rowconfigure(0, weight=1)
         self.paned.add(self.pane_2, weight=1)
+
 
         # Notebook, pane #2
         self.notebook = ttk.Notebook(self.pane_2)
-        self.notebook.pack(fill="both", expand=False)
+        self.notebook.pack(fill="both", expand=True)
 
-        # Tab #1
         self.tab_1 = ttk.Frame(self.notebook)
-        # for index in [0, 1]:
-        #     self.tab_1.columnconfigure(index=index, weight=1)
-        #     self.tab_1.rowconfigure(index=index, weight=1)
         self.notebook.add(self.tab_1, text="Configuration")
+
+        # Scrollable canvas for Tab 1
+        self.tab_1_scroll_canvas = tk.Canvas(self.tab_1, borderwidth=0, height=650)
+        self.tab_1_scroll_canvas.pack(side="left", fill="both", expand=True)
+
+        # Scrollbar for the canvas in Tab 1
+        self.tab_1_scrollbar = ttk.Scrollbar(self.tab_1, orient="vertical", command=self.tab_1_scroll_canvas.yview)
+        self.tab_1_scrollbar.pack(side="right", fill="y")
+        self.tab_1_scroll_canvas.configure(yscrollcommand=self.tab_1_scrollbar.set)
+
+        # Frame to contain all widgets in Tab 1
+        self.tab_1_frame = ttk.Frame(self.tab_1_scroll_canvas)
+        self.tab_1_canvas_window = self.tab_1_scroll_canvas.create_window((0, 0), window=self.tab_1_frame, anchor="nw")
+
+        def configure_scrollregion(event):
+            self.tab_1_scroll_canvas.configure(scrollregion=self.tab_1_scroll_canvas.bbox("all"))
+
+        self.tab_1_frame.bind("<Configure>", configure_scrollregion)
+        self.tab_1_scroll_canvas.bind("<Configure>", lambda e: self.tab_1_frame.config(width=e.width))
 
         # Label
         self.label = ttk.Label(
-            self.tab_1,
+            self.tab_1_frame,
             text="Dimension of Design Space",
             justify="left",
-            font=("-size", 12, "-weight", "bold"),
+            font=bold_font,
+            foreground="royal blue"
         )
         self.label.grid(row=0, column=0, pady=10, sticky="nw")
 
-        self.define_axis = ttk.LabelFrame(self.tab_1, text="Define Axis", padding=(20, 10))
+        self.define_axis = ttk.LabelFrame(self.tab_1_frame, text="Define Axis", padding=(20, 10))
         self.define_axis.grid(row=2, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
+        # Tab #2 setup with a scrollable area
         self.tab_2 = ttk.Frame(self.notebook)
         self.notebook.add(self.tab_2, text="Result")
-        self.query_point = ttk.LabelFrame(self.tab_2, text="Query Point", padding=(20, 10))
-        self.query_point.grid(row=3, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
-        self.input_new = ttk.LabelFrame(self.tab_2, text="Input New Data", padding=(20, 10))
-        self.input_new.grid(row=4, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
+
+        # Scrollable canvas for Tab 2
+        self.tab_2_scroll_canvas = tk.Canvas(self.tab_2, borderwidth=0)
+        self.tab_2_scroll_canvas.pack(side="left", fill="both", expand=True)
+
+        # Scrollbar for the canvas
+        self.tab_2_scrollbar = ttk.Scrollbar(self.tab_2, orient="vertical", command=self.tab_2_scroll_canvas.yview)
+        self.tab_2_scrollbar.pack(side="right", fill="y")
+        self.tab_2_scroll_canvas.configure(yscrollcommand=self.tab_2_scrollbar.set)
+
+        # Frame to contain all widgets in Tab 2
+        self.tab_2_frame = ttk.Frame(self.tab_2_scroll_canvas)
+        self.tab_2_canvas_window = self.tab_2_scroll_canvas.create_window((0, 0), window=self.tab_2_frame, anchor="nw")
+
+        self.tab_2_frame.bind("<Configure>", lambda e: self.tab_2_scroll_canvas.configure(
+            scrollregion=self.tab_2_scroll_canvas.bbox("all")))
+
+        # Now place all widgets of Tab 2 inside self.tab_2_frame
+        # Example for placing the graph area:
+        self.graph = ttk.LabelFrame(self.tab_2_frame, text="Graphing", padding=(0, 0))
+        self.graph.grid(row=2, column=0, padx=(0, 0), pady=(0, 0), sticky="nsew")
+        self.graph.columnconfigure(0, weight=1)
+        self.graph.rowconfigure(0, weight=1)
+
+        self.holder_frame = ttk.Frame(self.tab_2_frame)
+        self.holder_frame.grid(row=1,column=0, sticky="nw")
+        self.tree2 = ttk.Treeview(self.holder_frame, height=1, style="Custom.Treeview")
+        self.tree2.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
+        self.query_point = ttk.LabelFrame(self.holder_frame, text="Query Point", padding=(20, 10))
+        self.query_point.grid(row=0, column=1, padx=(20, 10), pady=(20, 10), sticky="nw")
+
+        self.query_point_inside = ttk.Frame(self.query_point)
+        self.query_point_inside.grid(row=0,column=0, sticky="nw")
+
+        self.input_new = ttk.LabelFrame(self.holder_frame, text="Input New Data", padding=(20, 10))
+        self.input_new.grid(row=0, column=2, padx=(20, 10), pady=(20, 10), sticky="nw")
+
+        self.input_new_holder = ttk.Frame(self.input_new)
+        self.input_new_holder.grid(row=0, column=0, sticky="nw")
 
         self.spinner_var.trace("w", self.update_text_widgets)
 
-        self.spinbox = ttk.Spinbox(self.tab_1, from_=1, to=5, increment=1, textvariable=self.spinner_var)
+        self.spinbox = ttk.Spinbox(self.tab_1_frame, from_=1, to=5, increment=1, textvariable=self.spinner_var)
         self.spinbox.insert(0, "1")
         self.spinbox.grid(row=1, column=0, padx=5, pady=5, sticky="nw")
 
@@ -217,76 +163,86 @@ class App(ttk.Frame):
                 self.define_axis,
                 text=value,
                 justify="left",
-                font=("-size", 12, "-weight", "bold"),
+                font=("-family", "Helvetica", "-size", 12, "-weight", "bold"),
             )
-            self.label.grid(row=0, column=index, pady=5, padx=5, sticky="n")
+            self.label.grid(row=0, column=index, pady=5, padx=5, sticky="nw")
 
         self.update_text_widgets()
 
         self.label = ttk.Label(
-            self.tab_1,
+            self.tab_1_frame,
             text="Upload Data",
             justify="left",
-            font=("-size", 12, "-weight", "bold"),
+            font=bold_font,
+            foreground="royal blue"
         )
         self.label.grid(row=3, column=0, pady=10, sticky="nw")
+        self.selectCSV = ttk.LabelFrame(self.tab_1_frame, text="Select CSV", padding=(20, 10))
+        self.selectCSV.grid(row=4, column=0, padx=(20, 10), pady=(10, 10), sticky="nw")
 
-        self.browse_button = ttk.Button(self.tab_1, text="Select CSV File", command=self.open_file_browser)
-        self.browse_button.grid(row=4, column=0, pady=10, sticky="nw")
 
-        self.file_path_entry = ttk.Entry(self.tab_1, width=100, textvariable=self.file_path_var, state="readonly")
-        self.file_path_entry.grid(row=5, column=0, pady=10, sticky="nw")
+        style = ttk.Style()
+        style.configure("W.TButton", background="royal blue", foreground="black", font=minor_font)
 
-        self.tree = ttk.Treeview(self.tab_1, height=3)
-        self.tree.grid(row=6, column=0, pady=10, sticky="nw")
+        self.browse_button = ttk.Button(self.selectCSV, text="Upload", command=self.open_file_browser, style="W.TButton")
+        self.browse_button.grid(row=1, column=0, pady=10, padx=0,sticky="nw")
 
-        self.run = ttk.Button(self.tab_1, text="Run GP BO", command=self.gprun, style="Accent.TButton")
-        self.run.grid(row=7, column=0, pady=10, sticky="nw")
+        self.file_path_entry = ttk.Entry(self.selectCSV, width=30, textvariable=self.file_path_var, state="readonly", font=minor_font)
+        self.file_path_entry.grid(row=1, column=1, pady=10, padx=5, sticky="nw")
+
+        self.CSVview = ttk.LabelFrame(self.tab_1_frame, text="Preview Data", padding=(20, 10))
+        self.CSVview.grid(row=5, column=0, padx=(20, 10), pady=(10, 10), sticky="nw")
+
+        self.tree = ttk.Treeview(self.CSVview, height=3, style="Custom.Treeview")
+        self.tree.grid(row=1, column=0, pady=10, sticky="nw")
+
+        style = ttk.Style()
+        style.configure('Minor.TButton', font=minor_font, foreground="royal blue")
+
+        self.run = ttk.Button(self.tab_1_frame, text="Run Gaussian Process with Bayesian Optimization", command=self.gprun, style="Minor.TButton")
+        self.run.grid(row=6, column=0, padx=15, pady=15, sticky="nw")
 
         # Tab #2
 
-
         self.label = ttk.Label(
-            self.tab_2,
+            self.tab_2_frame,
             text="Result",
             justify="left",
-            font=("-size", 12, "-weight", "bold"),
+            font=bold_font,
+            foreground="royal blue"
         )
         self.label.grid(row=0, column=0, pady=10, sticky="nw")
 
-        self.tree2 = ttk.Treeview(self.tab_2, height=1)
-        self.tree2.grid(row=1, column=0, pady=5, sticky="nw")
 
-        self.graph = ttk.LabelFrame(self.tab_2, text="Graphing", padding=(20, 10))
-        self.graph.grid(row=2, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
+
 
         self.plot_var.trace("w", self.plot_graph)
 
         self.spinbox2 = ttk.Spinbox(self.graph, from_=1, to=int(self.spinbox.get()), increment=1, textvariable=self.plot_var)
         self.spinbox2.insert(0, "1")
-        self.spinbox2.grid(row=0, column=0, padx=5, pady=5, sticky="nw")
+        # self.spinbox2.grid(row=0, column=0, padx=5, pady=5, sticky="nw")
         self.plot_graph()
 
         self.query = ttk.Button(self.query_point, text="Query Point", command=self.query_p, style="Accent.TButton")
-        self.query.grid(row=len(self.query_tracker)+1, column=0, pady=10, sticky="nw")
+        self.query.grid(row=1, column=0, pady=10, sticky="nw")
 
         l = ttk.Label(
-            self.input_new,
+            self.input_new_holder,
             text="y=",
             justify="left",
             font=("-size", 12, "-weight", "bold"),
         )
-        l.grid(row=0, column=0, pady=5, sticky="nw")
+        l.grid(row=0, column=0, pady=5, sticky="n")
 
-        self.yt = tk.Text(self.input_new, height=1, width=10)
-        self.yt.grid(row=0, column=1, padx=5, pady=5, sticky="nw")
+        self.yt = tk.Text(self.input_new_holder, height=1, width=5, borderwidth=1, relief="sunken")
+        self.yt.grid(row=0, column=1, padx=5, pady=5, sticky="n")
 
         self.togglebutton = ttk.Checkbutton(
             self.input_new, text="Edit CSV", style="Toggle.TButton"
         )
-        self.togglebutton.grid(row=1, column=0, padx=5, pady=1, sticky="nw")
+        self.togglebutton.grid(row=1, column=0, padx=5, pady=1, sticky="n")
         self.new_data = ttk.Button(self.input_new, text="Generate", command=self.input_new_data, style="Accent.TButton")
-        self.new_data.grid(row=2, column=0, pady=1, sticky="nw")
+        self.new_data.grid(row=2, column=0, pady=1, padx=5, sticky="n")
 
         # Tab #3
         # self.tab_3 = ttk.Frame(self.notebook)
@@ -328,30 +284,27 @@ class App(ttk.Frame):
             text="Mean: {}".format(mean),
             justify="left",
             font=("-size", 12, "-weight", "bold"), )
-        self.mean_l.grid(row=len(self.query_tracker) + 2, column=0, pady=5, sticky="nw")
+        self.mean_l.grid(row=2, column=0, pady=5, sticky="nw")
         self.variance_l = ttk.Label(
             self.query_point,
             text="Variance: {}".format(variance),
             justify="left",
             font=("-size", 12, "-weight", "bold"), )
-        self.variance_l.grid(row=len(self.query_tracker) + 3, column=0, pady=5, sticky="nw")
+        self.variance_l.grid(row=3, column=0, pady=5, sticky="nw")
 
     def plot_graph(self, *args):
         axis = int(self.spinbox2.get())
-        fig1 = self.gp.graph(axis)
+        fig1 = self.gp.graph(axis)  # This should now return a matplotlib figure
+
         if fig1 is not None:
-            if self.canvas:
+            # Check if canvas exists before trying to destroy it
+            if hasattr(self, 'canvas') and self.canvas is not None:
                 self.canvas.get_tk_widget().destroy()  # Destroy previous canvas if exists
-            self.canvas = FigureCanvasTkAgg(fig1, master=self.graph)
+
+            self.canvas = FigureCanvasTkAgg(fig1, master=self.graph)  # Embed in graph_frame
             self.canvas_widget = self.canvas.get_tk_widget()
-            self.canvas_widget.grid(row=1, column=0, sticky="nsew", expand=True)
-
-            self.scrollbar = ttk.Scrollbar(self.graph, orient="vertical", command=self.canvas_widget.yview)
-            self.scrollbar.grid(row=0, column=1, sticky="ns")
-            self.canvas_widget.configure(yscrollcommand=self.scrollbar.set)
+            self.canvas_widget.grid(row=0, column=0, sticky="nsew")  # Use grid
             self.canvas.draw()
-
-            self.canvas_widget.bind("<Configure>", self.update_scrollregion)
 
     def update_scrollregion(self, event):
         self.canvas_widget.configure(scrollregion=self.canvas_widget.bbox("all"))
@@ -376,15 +329,22 @@ class App(ttk.Frame):
         headers = []
         for i in self.axis_tracker:
             headers.append(i[0].get("1.0", tk.END).replace("\n", ""))
-        #headers.append("y")
+
         self.tree2["columns"] = headers[1:]
         self.tree2.delete(*self.tree2.get_children())
-        self.tree2.heading("#0", text=headers[0])
-        self.tree2.insert("", "end", text=te[0], values=tuple(te[1:]))
 
-        print(headers)
-        for header in headers[1:]:
-            self.tree2.heading(header, text=header)
+        # Set the width for the first column (#0)
+        self.tree2.column("#0", width=100)  # Adjust the width as needed
+        self.tree2.heading("#0", text=headers[0])
+
+        # Configure the width and heading for the rest of the columns
+        for index, header in enumerate(headers[1:], start=1):
+            col_id = f"#{index}"
+            self.tree2.column(col_id, width=100)  # Adjust the width as needed
+            self.tree2.heading(col_id, text=header)
+
+        # Insert data
+        self.tree2.insert("", "end", text=round(te[0], 4), values=tuple(round(x, 4) for x in te[1:]))
 
     def display_csv(self, file_path):
         try:
@@ -407,15 +367,31 @@ class App(ttk.Frame):
             self.gp.file_name = file_path
             self.gp.read_file()
 
+            self.adjust_tree_columns(self.tree, headers)
+
         except pd.errors.EmptyDataError:
             print("The CSV file is empty.")
         except Exception as e:
             print(f"Error: {e}")
 
+
+    def adjust_tree_columns(self, tree, column_headers):
+        tree.update_idletasks()  # Update the treeview
+
+        # Measure and adjust the width of additional columns
+        for ix, col in enumerate(column_headers, start=1):  # Start from 1 as 0 is the tree column
+            tree.column(col, width=font.Font().measure(col.title()))  # Set a base width for the column
+
+            for item in tree.get_children():
+                cell_value = tree.item(item, 'values')[ix-1]
+                col_w = font.Font().measure(cell_value)
+                if tree.column(col, width=None) < col_w:
+                    tree.column(col, width=col_w)
+
     def open_file_browser(self):
         file_path = filedialog.askopenfilename()
         if file_path:
-            self.file_path_var.set(file_path)
+            self.file_path_var.set(os.path.basename(file_path))
             self.display_csv(file_path)
 
     def update_text_widgets(self, *args):
@@ -431,7 +407,7 @@ class App(ttk.Frame):
             row_widgets = []
 
             for _ in range(3):
-                text_widget = tk.Text(self.define_axis, height=1, width=10)
+                text_widget = tk.Text(self.define_axis, height=1, width=10, borderwidth=1, relief="sunken")
                 text_widget.grid(row=i+len(self.axis_tracker)+1, column=_, padx=5, pady=5, sticky="n")
                 if _ == 0:
                     text_widget.insert(tk.END, "x{}".format(i+len(self.axis_tracker)+1))
@@ -440,13 +416,13 @@ class App(ttk.Frame):
             self.axis_tracker.append(row_widgets)
 
             l = ttk.Label(
-                self.query_point,
+                self.query_point_inside,
                 text=self.axis_tracker[-1][0].get("1.0", tk.END).replace("\n", ""),
                 justify="left",
                 font=("-size", 12, "-weight", "bold"),)
-            l.grid(row=i+len(self.axis_tracker)-1, column=0, pady=5, sticky="nw")
+            l.grid(row=i+len(self.axis_tracker)-1, column=0, pady=5, sticky="n")
 
-            t = tk.Text(self.query_point, height=1, width=10)
+            t = tk.Text(self.query_point_inside, height=1, width=5, borderwidth=1, relief="sunken")
             t.grid(row=i + len(self.axis_tracker)-1, column=1, padx=5, pady=5, sticky="n")
             t.insert(tk.END, "0.0")
 
@@ -464,6 +440,8 @@ class App(ttk.Frame):
 
 if __name__ == "__main__":
     root = tk.Tk()
+    # root.geometry('800x600')  # Set initial size of the window
+    # root.minsize(800, 600)
     root.title("")
 
     # Simply set the theme
