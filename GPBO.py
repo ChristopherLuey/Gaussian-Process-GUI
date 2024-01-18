@@ -139,12 +139,16 @@ class GPToolModel:
         return model_preds.mean.numpy(), 1.96 * np.sqrt(
             model_preds.variance.numpy())
 
-    def graph(self,axis):
+    def graph(self,axis, xlabel, ylabel):
         # if self.graphed_axis == axis:
         #     return self.fig1
 
         if self.x is not None and self.n == 1:
             self.fig1, (self.ax1, self.ax2) = plt.subplots(2, 1, sharex=True, figsize=(6, 6), gridspec_kw={'height_ratios': [2, 1]})
+
+            self.ax2.set_xlabel(xlabel)
+            self.ax1.set_ylabel(ylabel)
+
             self.ax1.scatter(self.x.T[axis-1], self.x.T[-1], label="3")
             self.ax1.plot(self.x_sample_space[axis-1].T, self.mean, label="4")
             self.ax1.fill_between(self.x_sample_space[axis-1].T, (self.mean - self.variance), (self.mean + self.variance), alpha=0.3)

@@ -294,7 +294,9 @@ class App(ttk.Frame):
 
     def plot_graph(self, *args):
         axis = int(self.spinbox2.get())
-        fig1 = self.gp.graph(axis)  # This should now return a matplotlib figure
+        xlabel = self.axis_tracker[-1][0].get("1.0", tk.END).replace("\n", "")
+        ylabel = 'y'  # Set y-axis label
+        fig1 = self.gp.graph(axis, xlabel, ylabel)  # This should now return a matplotlib figure
 
         if fig1 is not None:
             # Check if canvas exists before trying to destroy it
