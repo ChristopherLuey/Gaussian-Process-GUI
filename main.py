@@ -79,7 +79,7 @@ class App(ttk.Frame):
         self.notebook.add(self.tab_1, text="Configuration")
 
         # Scrollable canvas for Tab 1
-        self.tab_1_scroll_canvas = tk.Canvas(self.tab_1, borderwidth=0, height=650)
+        self.tab_1_scroll_canvas = tk.Canvas(self.tab_1, borderwidth=0, height=800)
         self.tab_1_scroll_canvas.pack(side="left", fill="both", expand=True)
 
         # Scrollbar for the canvas in Tab 1
@@ -132,22 +132,22 @@ class App(ttk.Frame):
         # Now place all widgets of Tab 2 inside self.tab_2_frame
         # Example for placing the graph area:
         self.graph = ttk.LabelFrame(self.tab_2_frame, text="Graphing", padding=(0, 0))
-        self.graph.grid(row=2, column=0, padx=(0, 0), pady=(0, 0), sticky="nsew")
+        self.graph.grid(row=2, column=0, padx=(10, 0), pady=(0, 0), sticky="nsew")
         self.graph.columnconfigure(0, weight=1)
         self.graph.rowconfigure(0, weight=1)
 
         self.holder_frame = ttk.Frame(self.tab_2_frame)
         self.holder_frame.grid(row=1,column=0, sticky="nw")
         self.tree2 = ttk.Treeview(self.holder_frame, height=1, style="Custom.Treeview")
-        self.tree2.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nw")
+        self.tree2.grid(row=0, column=0, padx=(20, 10), pady=(5, 5), sticky="nw")
         self.query_point = ttk.LabelFrame(self.holder_frame, text="Query Point", padding=(20, 10))
-        self.query_point.grid(row=0, column=1, padx=(20, 10), pady=(20, 10), sticky="nw")
+        self.query_point.grid(row=0, column=1, padx=(20, 10), pady=(5, 5), sticky="nw")
 
         self.query_point_inside = ttk.Frame(self.query_point)
         self.query_point_inside.grid(row=0,column=0, sticky="nw")
 
         self.input_new = ttk.LabelFrame(self.holder_frame, text="Input New Data", padding=(20, 10))
-        self.input_new.grid(row=0, column=2, padx=(20, 10), pady=(20, 10), sticky="nw")
+        self.input_new.grid(row=0, column=2, padx=(20, 10), pady=(5, 5), sticky="nw")
 
         self.input_new_holder = ttk.Frame(self.input_new)
         self.input_new_holder.grid(row=0, column=0, sticky="nw")
@@ -211,7 +211,7 @@ class App(ttk.Frame):
             font=bold_font,
             foreground="royal blue"
         )
-        self.label.grid(row=0, column=0, pady=10, sticky="nw")
+        self.label.grid(row=0, column=0, pady=5, sticky="nw")
 
 
 

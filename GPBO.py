@@ -144,8 +144,8 @@ class GPToolModel:
         #     return self.fig1
 
         if self.x is not None and self.n == 1:
-            self.fig1, (self.ax1, self.ax2) = plt.subplots(2, 1, sharex=True, figsize=(6, 6), gridspec_kw={'height_ratios': [2, 1]})
-
+            self.fig1, (self.ax1, self.ax2) = plt.subplots(2, 1, sharex=True, figsize=(6, 6), gridspec_kw={'height_ratios': [1.75, 1]})
+            self.fig1.tight_layout(pad=1.0)
             self.ax2.set_xlabel(xlabel)
             self.ax1.set_ylabel(ylabel)
 
